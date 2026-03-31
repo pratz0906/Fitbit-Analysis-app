@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- ── Filters ─────────────────────────────────────────────────────────── -->
+<section class="filters" id="filters-section">
+    <div class="filter-row">
+        <div class="filter-group">
+            <label for="start-date">Start Date</label>
+            <input type="date" id="start-date" value="{{ min_date }}">
+        </div>
+        <div class="filter-group">
+            <label for="end-date">End Date</label>
+            <input type="date" id="end-date" value="{{ max_date }}">
+        </div>
+        <div class="filter-group">
+            <label for="data-sources">Data Sources</label>
+            <select id="data-sources" multiple>
+                {% for src in sources %}
+                <option value="{{ src }}" selected>{{ src }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>View</label>
+            <div class="radio-group">
+                <label><input type="radio" name="view_mode" value="Daily" checked> Daily</label>
+                <label><input type="radio" name="view_mode" value="Monthly"> Monthly</label>
+            </div>
+        </div>
+        <div class="filter-group filter-apply">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary" id="apply-filters-btn">Apply Filters</button>
+        </div>
+    </div>
+</section>
+
+<!-- ── Metric cards ────────────────────────────────────────────────────── -->
+<section class="metric-cards" id="metric-cards">
+    <div class="card">
+        <div class="card-label" id="card-label-total">Total Steps</div>
+        <div class="card-value" id="metric-total">{{ metrics.total }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Daily Average</div>
+        <div class="card-value" id="metric-avg">{{ metrics.avg }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Best Day</div>
+        <div class="card-value" id="metric-best">{{ metrics.best_value }}</div>
+        <div class="card-delta" id="metric-best-day">{{ metrics.best_day }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">Active Days</div>
+        <div class="card-value" id="metric-days">{{ metrics.days }}</div>
+    </div>
+</section>
+
+<!-- ── Activity chart ──────────────────────────────────────────────────── -->
+<section class="chart-section">
+    <div class="chart-controls">
+        <div class="filter-group">
+            <label>Activity Metric</label>
+            <div class="radio-group">
+                <label><input type="radio" name="activity_metric" value="Steps" checked> Steps</label>
+                {% if has_distance %}
+                <label><input type="radio" name="activity_metric" value="Distance"> Distance</label>
+                {% endif %}
+            </div>
+        </div>
+        <div class="filter-group" id="dist-unit-group" style="display:none;">
+            <label>Distance Unit</label>
+            <div class="radio-group">
+                <label><input type="radio" name="dist_unit" value="miles" checked> Miles</label>
+                <label><input type="radio" name="dist_unit" value="km"> Km</label>
+            </div>
+        </div>
+    </div>
+    <div id="activity-chart"></div>
+</section>
+
+<!-- ── Steps Target Tracker ────────────────────────────────────────────── -->
+<section class="target-section">
+    <h2>Steps Target Tracker</h2>
+    <div class="target-inputs">
+        <div class="filter-group">
+            <label for="target-steps">Target Steps</label>
+            <input type="number" id="target-steps" min="1" placeholder="e.g. 100000">
+        </div>
+        <div class="filter-group">
+            <label for="target-start">Start Date</label>
+            <input type="date" id="target-start" value="{{ min_date }}">
+        </div>
+        <div class="filter-group">
+            <label for="target-end">End Date</label>
+            <input type="date" id="target-end">
+        </div>
+        <button class="btn btn-primary" id="target-calc-btn">Calculate</button>
+    </div>
+    <div id="target-result" class="target-result" style="display:none;">
+        <div class="target-progress-bar-container">
+            <div class="target-progress-bar" id="target-progress-bar" style="width:0%"></div>
+        </div>
+        <div class="target-progress-label" id="target-progress-label"></div>
+        <div class="metric-cards target-cards">
+            <div class="card card-sm">
+                <div class="card-label">Completed</div>
+                <div class="card-value" id="target-completed">-</div>
+            </div>
+            <div class="card card-sm">
+                <div class="card-label">Remaining</div>
+                <div class="card-value" id="target-remaining">-</div>
+            </div>
+            <div class="card card-sm">
+                <div class="card-label">Days Left</div>
+                <div class="card-value" id="target-days-left">-</div>
+            </div>
+            <div class="card card-sm highlight">
+                <div class="card-label">Daily Steps Needed</div>
+                <div class="card-value" id="target-daily-needed">-</div>
+            </div>
+        </div>
+        <div class="target-status" id="target-status"></div>
+    </div>
+</section>
+
+<!-- ── Weight section ──────────────────────────────────────────────────── -->
+{% if has_weight %}
+<section class="weight-section" id="weight-section">
+    <div class="section-header">
+        <h2>Weight</h2>
+        <div class="filter-group">
+            <div class="radio-group">
+                <label><input type="radio" name="weight_unit" value="lbs" checked> lbs</label>
+                <label><input type="radio" name="weight_unit" value="kg"> kg</label>
+            </div>
+        </div>
+    </div>
+    {% if w_metrics %}
+    <div class="metric-cards" id="weight-metric-cards">
+        <div class="card">
+            <div class="card-label">Latest Weight</div>
+            <div class="card-value" id="wmetric-latest">{{ w_metrics.latest }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Average Weight</div>
+            <div class="card-value" id="wmetric-avg">{{ w_metrics.avg }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Change</div>
+            <div class="card-value" id="wmetric-change">{{ w_metrics.change_value }}</div>
+            <div class="card-delta" id="wmetric-change-delta">{{ w_metrics.change_delta }}</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Measurements</div>
+            <div class="card-value" id="wmetric-measurements">{{ w_metrics.measurements }}</div>
+        </div>
+    </div>
+    <div class="chart-section">
+        <div id="weight-chart"></div>
+    </div>
+    {% else %}
+    <p class="info-message" id="weight-empty-msg">No weight data in the selected date range.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+<!-- ── Error / Warning overlay ─────────────────────────────────────────── -->
+<div id="filter-alert" class="alert alert-warning" style="display:none;"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const DATA_MIN_DATE = "{{ min_date }}";
+    const DATA_MAX_DATE = "{{ max_date }}";
+    const HAS_DISTANCE = {{ 'true' if has_distance else 'false' }};
+    const HAS_WEIGHT = {{ 'true' if has_weight else 'false' }};
+    const INITIAL_CHART = {{ chart_json | safe }};
+    const INITIAL_WEIGHT_CHART = {{ w_chart_json | safe if w_chart_json else 'null' }};
+</script>
+<script src="{{ url_for('static', filename='js/filters.js') }}"></script>
+{% endblock %}

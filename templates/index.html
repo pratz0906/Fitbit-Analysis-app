@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <h2>Upload Your Data</h2>
+        <p>Upload your Fitbit Google Takeout <code>.zip</code> file to get started.</p>
+
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data" id="upload-form">
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-icon">📁</div>
+                <p>Drag &amp; drop your .zip file here</p>
+                <p class="drop-zone-hint">or click to browse</p>
+                <input type="file" name="file" accept=".zip" id="file-input" required>
+            </div>
+            <p class="upload-limit">Maximum file size: 250 MB</p>
+            <div id="file-name" class="file-name-display"></div>
+            <button type="submit" class="btn btn-primary" id="upload-btn" disabled>Upload &amp; Analyze</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.getElementById('file-name');
+    const uploadBtn = document.getElementById('upload-btn');
+    const form = document.getElementById('upload-form');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            showFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) showFile(fileInput.files[0]);
+    });
+
+    function showFile(file) {
+        const sizeMB = (file.size / 1024 / 1024).toFixed(1);
+        fileNameDisplay.textContent = `${file.name} (${sizeMB} MB)`;
+        uploadBtn.disabled = false;
+    }
+
+    form.addEventListener('submit', () => {
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading & Processing…';
+    });
+})();
+</script>
+{% endblock %}
