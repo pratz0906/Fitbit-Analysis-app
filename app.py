@@ -2,7 +2,7 @@ import os
 import pickle
 import secrets
 import tempfile
-from datetime import date, datetime
+from datetime import date
 from math import ceil
 
 import pandas as pd
