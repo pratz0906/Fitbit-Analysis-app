@@ -339,6 +339,8 @@ def api_target():
     except (KeyError, ValueError, TypeError):
         return jsonify({"error": "Invalid input. Provide target_steps, target_start, and target_end."}), 400
 
+    selected_sources = params.get("sources", sorted(steps_df["data source"].dropna().unique().tolist()))
+
     if target_end <= target_start:
         return jsonify({"error": "Target end date must be after start date."}), 400
 
@@ -349,7 +351,11 @@ def api_target():
 
     # Steps completed within the target period (up to today)
     effective_end = min(today, target_end)
-    mask = (steps_df["date"] >= target_start) & (steps_df["date"] <= effective_end)
+    mask = (
+        (steps_df["date"] >= target_start)
+        & (steps_df["date"] <= effective_end)
+        & (steps_df["data source"].isin(selected_sources))
+    )
     steps_completed = int(steps_df.loc[mask].groupby("date")["steps"].sum().sum())
 
     remaining = max(0, target_steps - steps_completed)
@@ -400,4 +406,4 @@ def too_large(e):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, use_reloader=False)

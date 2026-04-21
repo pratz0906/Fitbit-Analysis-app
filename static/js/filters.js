@@ -17,6 +17,7 @@
     const targetSteps = document.getElementById("target-steps");
     const targetStart = document.getElementById("target-start");
     const targetEnd = document.getElementById("target-end");
+    const targetSources = document.getElementById("target-sources");
     const targetCalcBtn = document.getElementById("target-calc-btn");
     const targetResult = document.getElementById("target-result");
 
@@ -175,6 +176,7 @@
                     target_steps: parseInt(steps, 10),
                     target_start: tStart,
                     target_end: tEnd,
+                    sources: Array.from(targetSources.selectedOptions).map(o => o.value),
                 }),
             });
         } catch (e) {

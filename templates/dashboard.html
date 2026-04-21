@@ -94,6 +94,14 @@
             <label for="target-end">End Date</label>
             <input type="date" id="target-end">
         </div>
+        <div class="filter-group">
+            <label for="target-sources">Data Sources</label>
+            <select id="target-sources" multiple>
+                {% for src in sources %}
+                <option value="{{ src }}" selected>{{ src }}</option>
+                {% endfor %}
+            </select>
+        </div>
         <button class="btn btn-primary" id="target-calc-btn">Calculate</button>
     </div>
     <div id="target-result" class="target-result" style="display:none;">
